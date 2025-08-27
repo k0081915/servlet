@@ -1,5 +1,6 @@
 package hello.servlet.web.frontcontroller.v2;
 
+import hello.servlet.web.frontcontroller.MyView;
 import hello.servlet.web.frontcontroller.v1.ControllerV1;
 import hello.servlet.web.frontcontroller.v1.controller.MemberFormControllerV1;
 import hello.servlet.web.frontcontroller.v1.controller.MemberListControllerV1;
@@ -39,6 +40,8 @@ public class FrontControllerServletV2 extends HttpServlet {
             return;
         }
 
-        controller.process(request, response);
+        //new MyView("/WEB-INF/views/save-result.jsp");
+        MyView view = controller.process(request, response);
+        view.render(request, response);
     }
 }
