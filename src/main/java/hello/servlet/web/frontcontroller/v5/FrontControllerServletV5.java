@@ -33,9 +33,9 @@ public class FrontControllerServletV5 extends HttpServlet {
     }
 
     private void initHandlerMappingMap() {
-        handlerMappingMap.put("/front-controller/v3/members/new-form", new MemberFormControllerV3());
-        handlerMappingMap.put("/front-controller/v3/members/save", new MemberSaveControllerV3());
-        handlerMappingMap.put("/front-controller/v3/members", new MemberListControllerV3());
+        handlerMappingMap.put("/front-controller/v5/v3/members/new-form", new MemberFormControllerV3());
+        handlerMappingMap.put("/front-controller/v5/v3/members/save", new MemberSaveControllerV3());
+        handlerMappingMap.put("/front-controller/v5/v3/members", new MemberListControllerV3());
     }
 
     private void initHandlerAdapters() {
@@ -46,7 +46,6 @@ public class FrontControllerServletV5 extends HttpServlet {
     protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
         Object handler = getHandler(request);
-
         if (handler == null) {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
             return;
@@ -54,27 +53,32 @@ public class FrontControllerServletV5 extends HttpServlet {
 
         MyHandlerAdapter adapter = getHandlerAdapter(handler);
 
-//        Map<String, String> paramMap = createParamMap(request);
-//        ModelView mv = controller.process(paramMap);
-//
-//        String viewName = mv.getViewName();
-//        MyView view = viewResolver(viewName);
+        ModelView mv = adapter.handle(request, response, handler);
 
-//        view.render(mv.getModel(), request, response);
+        String viewName = mv.getViewName();
+        MyView view = viewResolver(viewName);
+
+        view.render(mv.getModel(), request, response);
 
     }
 
+    private static MyView viewResolver(String viewName) {
+        return new MyView("/WEB-INF/views/" + viewName + ".jsp");
+    }
+
+
+    private Object getHandler(HttpServletRequest request) {
+        String requestURI = request.getRequestURI();
+        return handlerMappingMap.get(requestURI);
+    }
+
     private MyHandlerAdapter getHandlerAdapter(Object handler) {
+        // handler 어댑터를 다 뒤져보면서 지원되는 핸들러가 있으면 해당하는 어댑터를 반환
         for (MyHandlerAdapter adapter : handlerAdapters) {
             if (adapter.supports(handler)) {
                 return adapter;
             }
         }
-        return null;
-    }
-
-    private Object getHandler(HttpServletRequest request) {
-        String requestURI = request.getRequestURI();
-        return handlerMappingMap.get(requestURI);
+        throw new IllegalArgumentException("handler adapter를 찾을 수 없습니다. handler=" + handler);
     }
 }
